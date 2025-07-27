@@ -1,0 +1,8 @@
+# Ignore Python cache and virtual env
+__pycache__/
+.venv/
+
+# Ignore uploaded and output Excel files
+uploads/
+output/
+*.xlsx
