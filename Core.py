@@ -14,10 +14,9 @@ class TimetableGenerator:
     """
     Ultimate Timetable Generator for 12 files (6 core + 6 cohort)
     Supports scalable daily classes (3-4), unified time system, and smart optimization
-    Modified for FastAPI integration
     """
 
-    def __init__(self, input_file_path=None):
+    def __init__(self):
         # ---------------------- TIME CONFIGURATION ----------------------
         self.TIME_SLOTS = [
             '08:00-09:15', '09:30-10:45', '11:00-12:15',
@@ -48,9 +47,6 @@ class TimetableGenerator:
         self.batch_info = {}
         self.stats = {'placed': 0, 'failed': 0, 'cohort': 0}
 
-        # Store the input file path for FastAPI integration
-        self.input_file_path = input_file_path
-
         print("🚀 Ultimate 12-File Timetable Generator Initialized")
         print(f"📅 Time Slots: {len(self.TIME_SLOTS)} | Lab Options: {len(self.LAB_COMBINATIONS)}")
         print(f"⚖️ Daily Classes: {self.MIN_CLASSES_PER_DAY}-{self.MAX_CLASSES_PER_DAY}")
@@ -65,13 +61,8 @@ class TimetableGenerator:
         print("-" * 40)
 
         if file_list is None:
-            if self.input_file_path:
-                # For FastAPI: Load single uploaded file
-                file_list = [self.input_file_path]
-            else:
-                # Original behavior: Load all xlsx files from current directory
-                file_list = list(Path('.').glob('*.xlsx'))
-                file_list = [f for f in file_list if not f.name.startswith('~')]
+            file_list = list(Path('.').glob('*.xlsx'))
+            file_list = [f for f in file_list if not f.name.startswith('~')]
         else:
             # Filter to only existing files
             existing_files = []
@@ -537,14 +528,8 @@ class TimetableGenerator:
     #                               OUTPUT OPERATIONS
     # ==================================================================================
 
-    def generate_output(self, filename=None):
+    def generate_output(self, filename="Ultimate_12File_Timetable.xlsx"):
         """Generate comprehensive Excel output"""
-        if filename is None:
-            # Ensure output directory exists
-            output_dir = "output"
-            os.makedirs(output_dir, exist_ok=True)
-            filename = os.path.join(output_dir, "final_output.xlsx")
-        
         print(f"\n💾 GENERATING OUTPUT: {filename}")
         print("-" * 40)
 
@@ -561,11 +546,9 @@ class TimetableGenerator:
                 self._create_summary_sheet(writer)
 
             print(f"✅ Timetable saved: {filename}")
-            return True
 
         except Exception as e:
             print(f"❌ Error saving: {e}")
-            return False
 
     def _create_department_sheet(self, writer, batch_key, batch_data):
         """Create sheet for department/semester"""
@@ -706,12 +689,12 @@ class TimetableGenerator:
         self.schedule_core_courses()
 
         # Generate output
-        success = self.generate_output()
+        self.generate_output()
 
         # Print results
         self._print_final_report()
 
-        return success
+        return True
 
     def _print_final_report(self):
         """Print comprehensive final report"""
@@ -720,9 +703,9 @@ class TimetableGenerator:
         print("=" * 60)
 
         print(f"\n📂 FILES PROCESSED:")
-        print(f"   📚 Core files: {len(self.core_files)}")
-        print(f"   📅 Cohort files: {len(self.cohort_files)}")
-        print(f"   🎯 Total: {len(self.core_files) + len(self.cohort_files)}")
+        print(f"   📚 Core files: {len(self.core_files)}/6")
+        print(f"   📅 Cohort files: {len(self.cohort_files)}/6")
+        print(f"   🎯 Total: {len(self.core_files) + len(self.cohort_files)}/12")
 
         print(f"\n📊 SCHEDULING RESULTS:")
         print(f"   ✅ Core courses placed: {self.stats['placed']}")
@@ -737,10 +720,7 @@ class TimetableGenerator:
         print(f"   📊 Total sections: {total_sections}")
         print(f"   🏛️ Departments: {len(set(batch['department'] for batch in self.batch_info.values()))}")
 
-        if self.input_file_path:
-            print(f"\n✨ Timetable generated successfully for FastAPI!")
-        else:
-            print(f"\n✨ 12-File system ready for expansion!")
+        print(f"\n✨ 12-File system ready for expansion!")
 
 
 # ==================================================================================
@@ -748,7 +728,7 @@ class TimetableGenerator:
 # ==================================================================================
 
 def main():
-    """Main execution function for standalone usage"""
+    """Main execution function"""
     # Initialize generator
     generator = TimetableGenerator()
 
@@ -780,7 +760,7 @@ def main():
 
     return generator
 
-# Run the system only if called directly (not when imported by FastAPI)
+# Run the system
 if __name__ == "__main__":
     generator = main()
 
